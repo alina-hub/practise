@@ -1,3 +1,36 @@
+$(window).on('load', function () {
+  
+
+  $.ajax({
+    url: "libs/php/selectcountry.php",
+    type: 'POST',
+    dataType: 'json',
+   
+    
+    success: function(result) {
+      console.log(JSON.stringify(result));
+      for(let i=0; i<result.data.features.length; i++){
+      $('#country').append("<option value="+result.data.features[i].properties.iso_a2+">"+result.data.features[i].properties.name+'</option>');
+      
+      }
+   
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+      console.log(jqXHR);
+      console.log(textStatus);
+      console.log(errorThrown);
+  }
+
+});
+
+
+
+
+});
+
+
+
+
 var mymap = L.map('mapid').setView([51.505, -0.09], 13);
 var OpenStreetMap_Mapnik = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 	maxZoom: 19,
@@ -31,16 +64,16 @@ function geoFindMe() {
 
 //select country
 
-function basement(feature, layer){
+/*function basement(feature, layer){
   layer.bindPopup("<p id='countryname'>"+feature.properties.name+"</p><br><p id='iso'>"+feature.properties.iso_a2+"</p>");
 };
 
 L.geoJSON(mygeo,{
   onEachFeature: basement
-}).addTo(mymap);
+}).addTo(mymap);*/
 
  
-$('#countryselect').click(function() {
+/*$('#countryselect').click(function() {
 let country=$('#country').val();
 
   for (var i=0; i<feature.properties.length; i++) {
@@ -53,32 +86,44 @@ let country=$('#country').val();
     border = L.geoJSON(filterData[0]); 
     map.fitBounds(border.getBounds()).addTo(mymap);
 
-   /*let country=$('#country').val();
+   let country=$('#country').val();
    let iso=$('#iso').val();
    if(country === iso){
     mymap.fitBounds([
       [40.712, -74.227],
       [40.774, -74.125]
   ]);
-   }*/
+   }
   }
 });
-  
-  /*$.ajax({
+*/
+
+
+
+/*$('#countryselect').click(function() {
+  $.ajax({
     url: "libs/php/selectcountry.php",
     type: 'POST',
     dataType: 'json',
     
     success: function(result) {
      console.log(result);
-    for (var i=0; i<result.data.border.features.length; i++) {
-      let box='';
-    if(country === result.data.border.features[i].properties.iso_a3){
-     box += '<div>'+result.data.border.features[i].properties.iso_a3+'</div>';
+     let country=$('#country').val();
+     let box='';
+   for (var i=0; i<result.data.border.features.length; i++) {
+      
+    if(country === result.data.border.features[i].properties.iso_a2){
+     box += '<div>'+result.data.border.features[i].properties.iso_a2+'</div>';
+     
+     $('#country').append($('<option>', {
+      value: result.data.border.features[i].properties.iso_a3,
+      text: result.data.border.features[i].properties.name,
+  }));
+
     }
-    
+   }
     $('#result').html(box);
-    let myGeoJSON= result;
+    /*let myGeoJSON= result;
 
     L.geoJason(myGeoJSON).addTo(map);
     }
@@ -94,8 +139,8 @@ let country=$('#country').val();
 
       const filterData = result.data.border.features.filter((a) => (a.properties.iso_a3 ===country));
       border = L.geoJSON(filterData[0]); 
-      map.fitBounds(border.getBounds()).addTo(map);
-    }
+      map.fitBounds(border.getBounds()).addTo(map);*/
+    
     
 
     /*L.geoJSON(geojsonFeature).addTo(map);
@@ -107,15 +152,95 @@ let country=$('#country').val();
              
 
       
-    /*},
+   /* },
     error: function(jqXHR, textStatus, errorThrown) {
       console.log(jqXHR);
               console.log(textStatus);
               console.log(errorThrown);
     }
   }); 
-	
 });*/
+
+  $('#countryselect').click(function() {
+
+    $.ajax({
+        url: "libs/php/country.php",
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            country: $('#country').val(),
+            
+            
+        },
+
+        
+
+        success: function(result) {
+
+            console.log(JSON.stringify(result));
+         
+             
+
+           var geojsonFeature = {
+
+              'type': 'Feature',
+
+              'geometry': {
+
+              'type': result['data']['type'],
+
+              'coordinates': result['data']['coordinates']
+
+  }
+
+};
+
+/*function basement(feature, layer){
+  
+  for(let i=0; i<feature.length; i++){
+
+  layer.bindPopup("<p id='countryname'>"+feature[i].properties.name+"</p><br><p id='iso'>"+feature[i].properties.iso_a2+"</p>");
+  }
+}*/
+
+
+
+           feature = L.geoJSON(geojsonFeature
+            );
+        
+           feature.addTo(mymap);
+           mymap.fitBounds(feature.getBounds(),{
+             padding: [20,20]
+           });
+            
+        
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.log(jqXHR);
+            console.log(textStatus);
+            console.log(errorThrown);
+        }
+    }); 
+
+});
+
+
+//easyButton
+L.easyButton('<img src="globe.svg" style="width:16px">', function(){
+ 
+  
+  alert($('#country').html());
+}).addTo(mymap);
+
+/*var glyphStar = L.map('glyph-star', {scrollWheelZoom: false}).setView([37.8, -96], 4);
+L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(glyphStar);
+
+L.easyButton( 'glyphicon-star', function(){
+  alert('you just clicked a glyphicon');
+}).addTo(glyphStar);*/
+   
+
+
 
 
 //your location
